@@ -272,7 +272,7 @@ void*                               GImGuiDemoMarkerCallbackUserData = NULL;
 // Demonstrate most Dear ImGui features (this is big function!)
 // You may execute this function to experiment with the UI and understand what it does.
 // You may then search for keywords in the code when you are interested by a specific feature.
-void ImGui::ShowDemoWindow(bool* p_open)
+void ImGui::ShowDemoWindow()
 {
     // Exceptionally add an extra assert here for people confused about initial Dear ImGui setup
     // Most functions would normally just assert/crash if the context is missing.
@@ -312,19 +312,20 @@ void ImGui::ShowDemoWindow(bool* p_open)
     if (show_app_long_text)           ShowExampleAppLongText(&show_app_long_text);
     if (show_app_window_titles)       ShowExampleAppWindowTitles(&show_app_window_titles);
 
-    // Dear ImGui Tools (accessible from the "Tools" menu)
-    static bool show_tool_metrics = false;
+    // Dear ImGui Apps (accessible from the "Tools" menu)
+//    static bool show_tool_metrics = false;
+//    static bool show_tool_debug_log = false;
     static bool show_tool_debug_log = false;
-    static bool show_tool_id_stack_tool = false;
+//    static bool show_tool_id_stack_tool = false;
     static bool show_tool_style_editor = false;
     static bool show_tool_about = false;
 
-    if (show_tool_metrics)
-        ImGui::ShowMetricsWindow(&show_tool_metrics);
-    if (show_tool_debug_log)
-        ImGui::ShowDebugLogWindow(&show_tool_debug_log);
-    if (show_tool_id_stack_tool)
-        ImGui::ShowIDStackToolWindow(&show_tool_id_stack_tool);
+//    if (show_tool_metrics)
+//        ImGui::ShowMetricsWindow(&show_app_metrics);
+//    if (show_tool_debug_log)
+//        ImGui::ShowDebugLogWindow(&show_tool_debug_log);
+//    if (show_tool_id_stack_tool)
+//        ImGui::ShowStackToolWindow(&show_tool_id_stack_tool);
     if (show_tool_style_editor)
     {
         ImGui::Begin("Dear ImGui Style Editor", &show_tool_style_editor);
@@ -334,47 +335,11 @@ void ImGui::ShowDemoWindow(bool* p_open)
     if (show_tool_about)
         ImGui::ShowAboutWindow(&show_tool_about);
 
-    // Demonstrate the various window flags. Typically you would just use the default!
-    static bool no_titlebar = false;
-    static bool no_scrollbar = false;
-    static bool no_menu = false;
-    static bool no_move = false;
-    static bool no_resize = false;
-    static bool no_collapse = false;
-    static bool no_close = false;
-    static bool no_nav = false;
-    static bool no_background = false;
-    static bool no_bring_to_front = false;
-    static bool no_docking = false;
-    static bool unsaved_document = false;
-
-    ImGuiWindowFlags window_flags = 0;
-    if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-    if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-    if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
-    if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
-    if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
-    if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
-    if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
-    if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
-    if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-    if (no_docking)         window_flags |= ImGuiWindowFlags_NoDocking;
-    if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
-    if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
-
     // We specify a default position/size in case there's no data in the .ini file.
     // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
     const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
-
-    // Main body of the Demo window starts here.
-    if (!ImGui::Begin("Dear ImGui Demo", p_open, window_flags))
-    {
-        // Early out if the window is collapsed, as an optimization.
-        ImGui::End();
-        return;
-    }
 
     // Most "big" widgets share a common width settings by default. See 'Demo->Layout->Widgets Width' for details.
     // e.g. Use 2/3 of the space for widgets and 1/3 for labels (right align)
@@ -416,6 +381,11 @@ void ImGui::ShowDemoWindow(bool* p_open)
             ImGui::EndMenu();
         }
         //if (ImGui::MenuItem("MenuItem")) {} // You can also use MenuItem() inside a menu bar!
+        // Preventing any windows from being opened that aren't closable through actions
+        // (since it would be recorded in `Context::ini_settings`, and thus make it to the undo stack, but would not be\
+        // undoable, since the open/close state is managed with a `bool` internal to ImGui).
+        // A separate Metrics window is controlled separately (and itself does not allow child windows from being opened).
+        /*
         if (ImGui::BeginMenu("Tools"))
         {
             IMGUI_DEMO_MARKER("Menu/Tools");
@@ -437,6 +407,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
             ImGui::MenuItem("About Dear ImGui", NULL, &show_tool_about);
             ImGui::EndMenu();
         }
+        */
         ImGui::EndMenuBar();
     }
 
@@ -619,27 +590,6 @@ void ImGui::ShowDemoWindow(bool* p_open)
         }
     }
 
-    IMGUI_DEMO_MARKER("Window options");
-    if (ImGui::CollapsingHeader("Window options"))
-    {
-        if (ImGui::BeginTable("split", 3))
-        {
-            ImGui::TableNextColumn(); ImGui::Checkbox("No titlebar", &no_titlebar);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No scrollbar", &no_scrollbar);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No menu", &no_menu);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No move", &no_move);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No resize", &no_resize);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No collapse", &no_collapse);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No close", &no_close);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No nav", &no_nav);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No background", &no_background);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No bring to front", &no_bring_to_front);
-            ImGui::TableNextColumn(); ImGui::Checkbox("No docking", &no_docking);
-            ImGui::TableNextColumn(); ImGui::Checkbox("Unsaved document", &unsaved_document);
-            ImGui::EndTable();
-        }
-    }
-
     // All demo contents
     ShowDemoWindowWidgets();
     ShowDemoWindowLayout();
@@ -649,7 +599,6 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
     // End of ShowDemoWindow()
     ImGui::PopItemWidth();
-    ImGui::End();
 }
 
 static void ShowDemoWindowWidgets()
@@ -8901,7 +8850,7 @@ void ShowExampleAppDocuments(bool* p_open)
 #else
 
 void ImGui::ShowAboutWindow(bool*) {}
-void ImGui::ShowDemoWindow(bool*) {}
+void ImGui::ShowDemoWindow() {}
 void ImGui::ShowUserGuide() {}
 void ImGui::ShowStyleEditor(ImGuiStyle*) {}
 

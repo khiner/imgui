@@ -20053,21 +20053,15 @@ void ImGui::ShowFontAtlas(ImFontAtlas* atlas)
     }
 }
 
-void ImGui::ShowMetricsWindow(bool* p_open)
+void ImGui::ShowMetricsWindow()
 {
     ImGuiContext& g = *GImGui;
     ImGuiIO& io = g.IO;
     ImGuiMetricsConfig* cfg = &g.DebugMetricsConfig;
-    if (cfg->ShowDebugLog)
-        ShowDebugLogWindow(&cfg->ShowDebugLog);
-    if (cfg->ShowIDStackTool)
-        ShowIDStackToolWindow(&cfg->ShowIDStackTool);
-
-    if (!Begin("Dear ImGui Metrics/Debugger", p_open) || GetCurrentWindow()->BeginCount > 1)
-    {
-        End();
-        return;
-    }
+//    if (cfg->ShowDebugLog)
+//        ShowDebugLogWindow(&cfg->ShowDebugLog);
+//    if (cfg->ShowIDStackTool)
+//        ShowIDStackToolWindow(&cfg->ShowIDStackTool);
 
     // [DEBUG] Clear debug breaks hooks after exactly one cycle.
     DebugBreakClearData();
@@ -20142,13 +20136,15 @@ void ImGui::ShowMetricsWindow(bool* p_open)
 
         SeparatorText("Visualize");
 
-        Checkbox("Show Debug Log", &cfg->ShowDebugLog);
-        SameLine();
-        MetricsHelpMarker("You can also call ImGui::ShowDebugLogWindow() from your code.");
+        // Stack Tool is your best friend!
+//        Checkbox("Show Debug Log", &cfg->ShowDebugLog);
+//        SameLine();
+//        MetricsHelpMarker("You can also call ImGui::ShowDebugLogWindow() from your code.");
 
-        Checkbox("Show ID Stack Tool", &cfg->ShowIDStackTool);
-        SameLine();
-        MetricsHelpMarker("You can also call ImGui::ShowIDStackToolWindow() from your code.");
+        // Stack Tool is your best friend!
+//        Checkbox("Show ID Stack Tool", &cfg->ShowIDStackTool);
+//        SameLine();
+//        MetricsHelpMarker("You can also call ImGui::ShowIDStackToolWindow() from your code.");
 
         Checkbox("Show windows begin order", &cfg->ShowWindowsBeginOrder);
         Checkbox("Show windows rectangles", &cfg->ShowWindowsRects);
@@ -20716,8 +20712,6 @@ void ImGui::ShowMetricsWindow(bool* p_open)
         overlay_draw_list->AddText(NULL, 0.0f, pos, IM_COL32(255, 255, 255, 255), buf);
     }
 #endif // #ifdef IMGUI_HAS_DOCK
-
-    End();
 }
 
 void ImGui::DebugBreakClearData()
@@ -21362,16 +21356,16 @@ static void ShowDebugLogFlag(const char* name, ImGuiDebugLogFlags flags)
     ImGui::SetItemTooltip("Hold SHIFT when clicking to enable for 2 frames only (useful for spammy log entries)");
 }
 
-void ImGui::ShowDebugLogWindow(bool* p_open)
+void ImGui::ShowDebugLogWindow()
 {
     ImGuiContext& g = *GImGui;
-    if (!(g.NextWindowData.Flags & ImGuiNextWindowDataFlags_HasSize))
-        SetNextWindowSize(ImVec2(0.0f, GetFontSize() * 12.0f), ImGuiCond_FirstUseEver);
-    if (!Begin("Dear ImGui Debug Log", p_open) || GetCurrentWindow()->BeginCount > 1)
-    {
-        End();
-        return;
-    }
+//    if (!(g.NextWindowData.Flags & ImGuiNextWindowDataFlags_HasSize))
+//        SetNextWindowSize(ImVec2(0.0f, GetFontSize() * 12.0f), ImGuiCond_FirstUseEver);
+//    if (!Begin("Dear ImGui Debug Log", p_open) || GetCurrentWindow()->BeginCount > 1)
+//    {
+//        End();
+//        return;
+//    }
 
     ImGuiDebugLogFlags all_enable_flags = ImGuiDebugLogFlags_EventMask_ & ~ImGuiDebugLogFlags_EventInputRouting;
     CheckboxFlags("All", &g.DebugLogFlags, all_enable_flags);
@@ -21429,7 +21423,7 @@ void ImGui::ShowDebugLogWindow(bool* p_open)
         SetScrollHereY(1.0f);
     EndChild();
 
-    End();
+//    End();
 }
 
 //-----------------------------------------------------------------------------
@@ -21661,16 +21655,16 @@ static int StackToolFormatLevelInfo(ImGuiIDStackTool* tool, int n, bool format_f
 }
 
 // ID Stack Tool: Display UI
-void ImGui::ShowIDStackToolWindow(bool* p_open)
+void ImGui::ShowIDStackToolWindow()
 {
     ImGuiContext& g = *GImGui;
-    if (!(g.NextWindowData.Flags & ImGuiNextWindowDataFlags_HasSize))
-        SetNextWindowSize(ImVec2(0.0f, GetFontSize() * 8.0f), ImGuiCond_FirstUseEver);
-    if (!Begin("Dear ImGui ID Stack Tool", p_open) || GetCurrentWindow()->BeginCount > 1)
-    {
-        End();
-        return;
-    }
+//    if (!(g.NextWindowData.Flags & ImGuiNextWindowDataFlags_HasSize))
+//        SetNextWindowSize(ImVec2(0.0f, GetFontSize() * 8.0f), ImGuiCond_FirstUseEver);
+//    if (!Begin("Dear ImGui ID Stack Tool", p_open) || GetCurrentWindow()->BeginCount > 1)
+//    {
+//        End();
+//        return;
+//    }
 
     // Display hovered/active status
     ImGuiIDStackTool* tool = &g.DebugIDStackTool;
@@ -21734,12 +21728,12 @@ void ImGui::ShowIDStackToolWindow(bool* p_open)
         }
         EndTable();
     }
-    End();
+//    End();
 }
 
 #else
 
-void ImGui::ShowMetricsWindow(bool*) {}
+void ImGui::ShowMetricsWindow() {}
 void ImGui::ShowFontAtlas(ImFontAtlas*) {}
 void ImGui::DebugNodeColumns(ImGuiOldColumns*) {}
 void ImGui::DebugNodeDrawList(ImGuiWindow*, ImGuiViewportP*, const ImDrawList*, const char*) {}
@@ -21754,8 +21748,8 @@ void ImGui::DebugNodeViewport(ImGuiViewportP*) {}
 
 void ImGui::DebugLog(const char*, ...) {}
 void ImGui::DebugLogV(const char*, va_list) {}
-void ImGui::ShowDebugLogWindow(bool*) {}
-void ImGui::ShowIDStackToolWindow(bool*) {}
+void ImGui::ShowDebugLogWindow() {}
+void ImGui::ShowIDStackToolWindow() {}
 void ImGui::DebugStartItemPicker() {}
 void ImGui::DebugHookIdInfo(ImGuiID, ImGuiDataType, const void*, const void*) {}
 
