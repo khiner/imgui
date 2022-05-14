@@ -15075,8 +15075,9 @@ void ImGui::UpdateSettings()
     if (!g.SettingsLoaded)
     {
         IM_ASSERT(g.SettingsWindows.empty());
-        if (g.IO.IniFilename)
-            LoadIniSettingsFromDisk(g.IO.IniFilename);
+        // FlowGrid: Not using serialized IniSettings
+//        if (g.IO.IniFilename)
+//            LoadIniSettingsFromDisk(g.IO.IniFilename);
         g.SettingsLoaded = true;
     }
 
@@ -15144,88 +15145,90 @@ void ImGui::ClearIniSettings()
             handler.ClearAllFn(&g, &handler);
 }
 
-void ImGui::LoadIniSettingsFromDisk(const char* ini_filename)
-{
-    size_t file_data_size = 0;
-    char* file_data = (char*)ImFileLoadToMemory(ini_filename, "rb", &file_data_size);
-    if (!file_data)
-        return;
-    if (file_data_size > 0)
-        LoadIniSettingsFromMemory(file_data, (size_t)file_data_size);
-    IM_FREE(file_data);
-}
+// FlowGrid: Not using serialized IniSettings
+//void ImGui::LoadIniSettingsFromDisk(const char* ini_filename)
+//{
+//    size_t file_data_size = 0;
+//    char* file_data = (char*)ImFileLoadToMemory(ini_filename, "rb", &file_data_size);
+//    if (!file_data)
+//        return;
+//    LoadIniSettingsFromMemory(file_data, (size_t)file_data_size);
+//    IM_FREE(file_data);
+//}
 
+// FlowGrid: Not using serialized IniSettings
 // Zero-tolerance, no error reporting, cheap .ini parsing
+
 // Set ini_size==0 to let us use strlen(ini_data). Do not call this function with a 0 if your buffer is actually empty!
-void ImGui::LoadIniSettingsFromMemory(const char* ini_data, size_t ini_size)
-{
-    ImGuiContext& g = *GImGui;
-    IM_ASSERT(g.Initialized);
-    //IM_ASSERT(!g.WithinFrameScope && "Cannot be called between NewFrame() and EndFrame()");
-    //IM_ASSERT(g.SettingsLoaded == false && g.FrameCount == 0);
+// void ImGui::LoadIniSettingsFromMemory(const char* ini_data, size_t ini_size)
+// {
+//     ImGuiContext& g = *GImGui;
+//     IM_ASSERT(g.Initialized);
+//     //IM_ASSERT(!g.WithinFrameScope && "Cannot be called between NewFrame() and EndFrame()");
+//     //IM_ASSERT(g.SettingsLoaded == false && g.FrameCount == 0);
 
-    // For user convenience, we allow passing a non zero-terminated string (hence the ini_size parameter).
-    // For our convenience and to make the code simpler, we'll also write zero-terminators within the buffer. So let's create a writable copy..
-    if (ini_size == 0)
-        ini_size = strlen(ini_data);
-    g.SettingsIniData.Buf.resize((int)ini_size + 1);
-    char* const buf = g.SettingsIniData.Buf.Data;
-    char* const buf_end = buf + ini_size;
-    memcpy(buf, ini_data, ini_size);
-    buf_end[0] = 0;
+//     // For user convenience, we allow passing a non zero-terminated string (hence the ini_size parameter).
+//     // For our convenience and to make the code simpler, we'll also write zero-terminators within the buffer. So let's create a writable copy..
+//     if (ini_size == 0)
+//         ini_size = strlen(ini_data);
+//     g.SettingsIniData.Buf.resize((int)ini_size + 1);
+//     char* const buf = g.SettingsIniData.Buf.Data;
+//     char* const buf_end = buf + ini_size;
+//     memcpy(buf, ini_data, ini_size);
+//     buf_end[0] = 0;
 
-    // Call pre-read handlers
-    // Some types will clear their data (e.g. dock information) some types will allow merge/override (window)
-    for (ImGuiSettingsHandler& handler : g.SettingsHandlers)
-        if (handler.ReadInitFn != NULL)
-            handler.ReadInitFn(&g, &handler);
+//     // Call pre-read handlers
+//     // Some types will clear their data (e.g. dock information) some types will allow merge/override (window)
+//     for (ImGuiSettingsHandler& handler : g.SettingsHandlers)
+//         if (handler.ReadInitFn != NULL)
+//             handler.ReadInitFn(&g, &handler);
 
-    void* entry_data = NULL;
-    ImGuiSettingsHandler* entry_handler = NULL;
+//     void* entry_data = NULL;
+//     ImGuiSettingsHandler* entry_handler = NULL;
 
-    char* line_end = NULL;
-    for (char* line = buf; line < buf_end; line = line_end + 1)
-    {
-        // Skip new lines markers, then find end of the line
-        while (*line == '\n' || *line == '\r')
-            line++;
-        line_end = line;
-        while (line_end < buf_end && *line_end != '\n' && *line_end != '\r')
-            line_end++;
-        line_end[0] = 0;
-        if (line[0] == ';')
-            continue;
-        if (line[0] == '[' && line_end > line && line_end[-1] == ']')
-        {
-            // Parse "[Type][Name]". Note that 'Name' can itself contains [] characters, which is acceptable with the current format and parsing code.
-            line_end[-1] = 0;
-            const char* name_end = line_end - 1;
-            const char* type_start = line + 1;
-            char* type_end = (char*)(void*)ImStrchrRange(type_start, name_end, ']');
-            const char* name_start = type_end ? ImStrchrRange(type_end + 1, name_end, '[') : NULL;
-            if (!type_end || !name_start)
-                continue;
-            *type_end = 0; // Overwrite first ']'
-            name_start++;  // Skip second '['
-            entry_handler = FindSettingsHandler(type_start);
-            entry_data = entry_handler ? entry_handler->ReadOpenFn(&g, entry_handler, name_start) : NULL;
-        }
-        else if (entry_handler != NULL && entry_data != NULL)
-        {
-            // Let type handler parse the line
-            entry_handler->ReadLineFn(&g, entry_handler, entry_data, line);
-        }
-    }
-    g.SettingsLoaded = true;
+//     char* line_end = NULL;
+//     for (char* line = buf; line < buf_end; line = line_end + 1)
+//     {
+//         // Skip new lines markers, then find end of the line
+//         while (*line == '\n' || *line == '\r')
+//             line++;
+//         line_end = line;
+//         while (line_end < buf_end && *line_end != '\n' && *line_end != '\r')
+//             line_end++;
+//         line_end[0] = 0;
+//         if (line[0] == ';')
+//             continue;
+//         if (line[0] == '[' && line_end > line && line_end[-1] == ']')
+//         {
+//             // Parse "[Type][Name]". Note that 'Name' can itself contains [] characters, which is acceptable with the current format and parsing code.
+//             line_end[-1] = 0;
+//             const char* name_end = line_end - 1;
+//             const char* type_start = line + 1;
+//             char* type_end = (char*)(void*)ImStrchrRange(type_start, name_end, ']');
+//             const char* name_start = type_end ? ImStrchrRange(type_end + 1, name_end, '[') : NULL;
+//             if (!type_end || !name_start)
+//                 continue;
+//             *type_end = 0; // Overwrite first ']'
+//             name_start++;  // Skip second '['
+//             entry_handler = FindSettingsHandler(type_start);
+//             entry_data = entry_handler ? entry_handler->ReadOpenFn(&g, entry_handler, name_start) : NULL;
+//         }
+//         else if (entry_handler != NULL && entry_data != NULL)
+//         {
+//             // Let type handler parse the line
+//             entry_handler->ReadLineFn(&g, entry_handler, entry_data, line);
+//         }
+//     }
+//     g.SettingsLoaded = true;
 
-    // [DEBUG] Restore untouched copy so it can be browsed in Metrics (not strictly necessary)
-    memcpy(buf, ini_data, ini_size);
+//     // [DEBUG] Restore untouched copy so it can be browsed in Metrics (not strictly necessary)
+//     memcpy(buf, ini_data, ini_size);
 
-    // Call post-read handlers
-    for (ImGuiSettingsHandler& handler : g.SettingsHandlers)
-        if (handler.ApplyAllFn != NULL)
-            handler.ApplyAllFn(&g, &handler);
-}
+//     // Call post-read handlers
+//     for (ImGuiSettingsHandler& handler : g.SettingsHandlers)
+//         if (handler.ApplyAllFn != NULL)
+//             handler.ApplyAllFn(&g, &handler);
+// }
 
 void ImGui::SaveIniSettingsToDisk(const char* ini_filename)
 {
@@ -15399,43 +15402,44 @@ static void WindowSettingsHandler_WriteAll(ImGuiContext* ctx, ImGuiSettingsHandl
     }
 
     // Write to text buffer
-    buf->reserve(buf->size() + g.SettingsWindows.size() * 6); // ballpark reserve
-    for (ImGuiWindowSettings* settings = g.SettingsWindows.begin(); settings != NULL; settings = g.SettingsWindows.next_chunk(settings))
-    {
-        if (settings->WantDelete)
-            continue;
-        const char* settings_name = settings->GetName();
-        buf->appendf("[%s][%s]\n", handler->TypeName, settings_name);
-        if (settings->IsChild)
-        {
-            buf->appendf("IsChild=1\n");
-            buf->appendf("Size=%d,%d\n", settings->Size.x, settings->Size.y);
-        }
-        else
-        {
-            if (settings->ViewportId != 0 && settings->ViewportId != ImGui::IMGUI_VIEWPORT_DEFAULT_ID)
-            {
-                buf->appendf("ViewportPos=%d,%d\n", settings->ViewportPos.x, settings->ViewportPos.y);
-                buf->appendf("ViewportId=0x%08X\n", settings->ViewportId);
-            }
-            if (settings->Pos.x != 0 || settings->Pos.y != 0 || settings->ViewportId == ImGui::IMGUI_VIEWPORT_DEFAULT_ID)
-                buf->appendf("Pos=%d,%d\n", settings->Pos.x, settings->Pos.y);
-            if (settings->Size.x != 0 || settings->Size.y != 0)
-                buf->appendf("Size=%d,%d\n", settings->Size.x, settings->Size.y);
-            buf->appendf("Collapsed=%d\n", settings->Collapsed);
-            if (settings->DockId != 0)
-            {
-                //buf->appendf("TabId=0x%08X\n", ImHashStr("#TAB", 4, settings->ID)); // window->TabId: this is not read back but writing it makes "debugging" the .ini data easier.
-                if (settings->DockOrder == -1)
-                    buf->appendf("DockId=0x%08X\n", settings->DockId);
-                else
-                    buf->appendf("DockId=0x%08X,%d\n", settings->DockId, settings->DockOrder);
-                if (settings->ClassId != 0)
-                    buf->appendf("ClassId=0x%08X\n", settings->ClassId);
-            }
-        }
-        buf->append("\n");
-    }
+    // FlowGrid: Serialization not needed since we're copying from in-memory settings structs into FlowGrid state
+    // buf->reserve(buf->size() + g.SettingsWindows.size() * 6); // ballpark reserve
+    // for (ImGuiWindowSettings* settings = g.SettingsWindows.begin(); settings != NULL; settings = g.SettingsWindows.next_chunk(settings))
+    // {
+    //     if (settings->WantDelete)
+    //         continue;
+    //     const char* settings_name = settings->GetName();
+    //     buf->appendf("[%s][%s]\n", handler->TypeName, settings_name);
+    //     if (settings->IsChild)
+    //     {
+    //         buf->appendf("IsChild=1\n");
+    //         buf->appendf("Size=%d,%d\n", settings->Size.x, settings->Size.y);
+    //     }
+    //     else
+    //     {
+    //         if (settings->ViewportId != 0 && settings->ViewportId != ImGui::IMGUI_VIEWPORT_DEFAULT_ID)
+    //         {
+    //             buf->appendf("ViewportPos=%d,%d\n", settings->ViewportPos.x, settings->ViewportPos.y);
+    //             buf->appendf("ViewportId=0x%08X\n", settings->ViewportId);
+    //         }
+    //         if (settings->Pos.x != 0 || settings->Pos.y != 0 || settings->ViewportId == ImGui::IMGUI_VIEWPORT_DEFAULT_ID)
+    //             buf->appendf("Pos=%d,%d\n", settings->Pos.x, settings->Pos.y);
+    //         if (settings->Size.x != 0 || settings->Size.y != 0)
+    //             buf->appendf("Size=%d,%d\n", settings->Size.x, settings->Size.y);
+    //         buf->appendf("Collapsed=%d\n", settings->Collapsed);
+    //         if (settings->DockId != 0)
+    //         {
+    //             //buf->appendf("TabId=0x%08X\n", ImHashStr("#TAB", 4, settings->ID)); // window->TabId: this is not read back but writing it makes "debugging" the .ini data easier.
+    //             if (settings->DockOrder == -1)
+    //                 buf->appendf("DockId=0x%08X\n", settings->DockId);
+    //             else
+    //                 buf->appendf("DockId=0x%08X,%d\n", settings->DockId, settings->DockOrder);
+    //             if (settings->ClassId != 0)
+    //                 buf->appendf("ClassId=0x%08X\n", settings->ClassId);
+    //         }
+    //     }
+    //     buf->append("\n");
+    // }
 }
 
 
@@ -16725,7 +16729,7 @@ void ImGui::DockContextRebuildNodes(ImGuiContext* ctx)
     ImGuiContext& g = *ctx;
     ImGuiDockContext* dc = &ctx->DockContext;
     IMGUI_DEBUG_LOG_DOCKING("[docking] DockContextRebuildNodes\n");
-    SaveIniSettingsToMemory();
+//    SaveIniSettingsToMemory();
     ImGuiID root_id = 0; // Rebuild all
     DockContextClearNodes(ctx, root_id, false);
     DockContextBuildNodesFromSettings(ctx, dc->NodesSettings.Data, dc->NodesSettings.Size);
@@ -20354,61 +20358,62 @@ static void ImGui::DockSettingsHandler_WriteAll(ImGuiContext* ctx, ImGuiSettings
         max_depth = ImMax((int)dc->NodesSettings[node_n].Depth, max_depth);
 
     // Write to text buffer
-    buf->appendf("[%s][Data]\n", handler->TypeName);
-    for (int node_n = 0; node_n < dc->NodesSettings.Size; node_n++)
-    {
-        const int line_start_pos = buf->size(); (void)line_start_pos;
-        const ImGuiDockNodeSettings* node_settings = &dc->NodesSettings[node_n];
-        buf->appendf("%*s%s%*s", node_settings->Depth * 2, "", (node_settings->Flags & ImGuiDockNodeFlags_DockSpace) ? "DockSpace" : "DockNode ", (max_depth - node_settings->Depth) * 2, "");  // Text align nodes to facilitate looking at .ini file
-        buf->appendf(" ID=0x%08X", node_settings->ID);
-        if (node_settings->ParentNodeId)
-        {
-            buf->appendf(" Parent=0x%08X SizeRef=%d,%d", node_settings->ParentNodeId, node_settings->SizeRef.x, node_settings->SizeRef.y);
-        }
-        else
-        {
-            if (node_settings->ParentWindowId)
-                buf->appendf(" Window=0x%08X", node_settings->ParentWindowId);
-            buf->appendf(" Pos=%d,%d Size=%d,%d", node_settings->Pos.x, node_settings->Pos.y, node_settings->Size.x, node_settings->Size.y);
-        }
-        if (node_settings->SplitAxis != ImGuiAxis_None)
-            buf->appendf(" Split=%c", (node_settings->SplitAxis == ImGuiAxis_X) ? 'X' : 'Y');
-        if (node_settings->Flags & ImGuiDockNodeFlags_NoResize)
-            buf->appendf(" NoResize=1");
-        if (node_settings->Flags & ImGuiDockNodeFlags_CentralNode)
-            buf->appendf(" CentralNode=1");
-        if (node_settings->Flags & ImGuiDockNodeFlags_NoTabBar)
-            buf->appendf(" NoTabBar=1");
-        if (node_settings->Flags & ImGuiDockNodeFlags_HiddenTabBar)
-            buf->appendf(" HiddenTabBar=1");
-        if (node_settings->Flags & ImGuiDockNodeFlags_NoWindowMenuButton)
-            buf->appendf(" NoWindowMenuButton=1");
-        if (node_settings->Flags & ImGuiDockNodeFlags_NoCloseButton)
-            buf->appendf(" NoCloseButton=1");
-        if (node_settings->SelectedTabId)
-            buf->appendf(" Selected=0x%08X", node_settings->SelectedTabId);
+    // FlowGrid: Serialization not needed since we're copying from in-memory settings structs into FlowGrid state
+    // buf->appendf("[%s][Data]\n", handler->TypeName);
+    // for (int node_n = 0; node_n < dc->NodesSettings.Size; node_n++)
+    // {
+    //     const int line_start_pos = buf->size(); (void)line_start_pos;
+    //     const ImGuiDockNodeSettings* node_settings = &dc->NodesSettings[node_n];
+    //     buf->appendf("%*s%s%*s", node_settings->Depth * 2, "", (node_settings->Flags & ImGuiDockNodeFlags_DockSpace) ? "DockSpace" : "DockNode ", (max_depth - node_settings->Depth) * 2, "");  // Text align nodes to facilitate looking at .ini file
+    //     buf->appendf(" ID=0x%08X", node_settings->ID);
+    //     if (node_settings->ParentNodeId)
+    //     {
+    //         buf->appendf(" Parent=0x%08X SizeRef=%d,%d", node_settings->ParentNodeId, node_settings->SizeRef.x, node_settings->SizeRef.y);
+    //     }
+    //     else
+    //     {
+    //         if (node_settings->ParentWindowId)
+    //             buf->appendf(" Window=0x%08X", node_settings->ParentWindowId);
+    //         buf->appendf(" Pos=%d,%d Size=%d,%d", node_settings->Pos.x, node_settings->Pos.y, node_settings->Size.x, node_settings->Size.y);
+    //     }
+    //     if (node_settings->SplitAxis != ImGuiAxis_None)
+    //         buf->appendf(" Split=%c", (node_settings->SplitAxis == ImGuiAxis_X) ? 'X' : 'Y');
+    //     if (node_settings->Flags & ImGuiDockNodeFlags_NoResize)
+    //         buf->appendf(" NoResize=1");
+    //     if (node_settings->Flags & ImGuiDockNodeFlags_CentralNode)
+    //         buf->appendf(" CentralNode=1");
+    //     if (node_settings->Flags & ImGuiDockNodeFlags_NoTabBar)
+    //         buf->appendf(" NoTabBar=1");
+    //     if (node_settings->Flags & ImGuiDockNodeFlags_HiddenTabBar)
+    //         buf->appendf(" HiddenTabBar=1");
+    //     if (node_settings->Flags & ImGuiDockNodeFlags_NoWindowMenuButton)
+    //         buf->appendf(" NoWindowMenuButton=1");
+    //     if (node_settings->Flags & ImGuiDockNodeFlags_NoCloseButton)
+    //         buf->appendf(" NoCloseButton=1");
+    //     if (node_settings->SelectedTabId)
+    //         buf->appendf(" Selected=0x%08X", node_settings->SelectedTabId);
 
-        // [DEBUG] Include comments in the .ini file to ease debugging (this makes saving slower!)
-        if (g.IO.ConfigDebugIniSettings)
-            if (ImGuiDockNode* node = DockContextFindNodeByID(ctx, node_settings->ID))
-            {
-                buf->appendf("%*s", ImMax(2, (line_start_pos + 92) - buf->size()), "");     // Align everything
-                if (node->IsDockSpace() && node->HostWindow && node->HostWindow->ParentWindow)
-                    buf->appendf(" ; in '%s'", node->HostWindow->ParentWindow->Name);
-                // Iterate settings so we can give info about windows that didn't exist during the session.
-                int contains_window = 0;
-                for (ImGuiWindowSettings* settings = g.SettingsWindows.begin(); settings != NULL; settings = g.SettingsWindows.next_chunk(settings))
-                    if (settings->DockId == node_settings->ID)
-                    {
-                        if (contains_window++ == 0)
-                            buf->appendf(" ; contains ");
-                        buf->appendf("'%s' ", settings->GetName());
-                    }
-            }
+    //     // [DEBUG] Include comments in the .ini file to ease debugging (this makes saving slower!)
+    //     if (g.IO.ConfigDebugIniSettings)
+    //         if (ImGuiDockNode* node = DockContextFindNodeByID(ctx, node_settings->ID))
+    //         {
+    //             buf->appendf("%*s", ImMax(2, (line_start_pos + 92) - buf->size()), "");     // Align everything
+    //             if (node->IsDockSpace() && node->HostWindow && node->HostWindow->ParentWindow)
+    //                 buf->appendf(" ; in '%s'", node->HostWindow->ParentWindow->Name);
+    //             // Iterate settings so we can give info about windows that didn't exist during the session.
+    //             int contains_window = 0;
+    //             for (ImGuiWindowSettings* settings = g.SettingsWindows.begin(); settings != NULL; settings = g.SettingsWindows.next_chunk(settings))
+    //                 if (settings->DockId == node_settings->ID)
+    //                 {
+    //                     if (contains_window++ == 0)
+    //                         buf->appendf(" ; contains ");
+    //                     buf->appendf("'%s' ", settings->GetName());
+    //                 }
+    //         }
 
-        buf->appendf("\n");
-    }
-    buf->appendf("\n");
+    //     buf->appendf("\n");
+    // }
+    // buf->appendf("\n");
 }
 
 
@@ -21316,11 +21321,11 @@ void ImGui::ShowMetricsWindow()
         }
 #endif // #ifdef IMGUI_HAS_DOCK
 
-        if (TreeNode("SettingsIniData", "Settings unpacked data (.ini): %d bytes", g.SettingsIniData.size()))
-        {
-            InputTextMultiline("##Ini", (char*)(void*)g.SettingsIniData.c_str(), g.SettingsIniData.Buf.Size, ImVec2(-FLT_MIN, GetTextLineHeight() * 20), ImGuiInputTextFlags_ReadOnly);
-            TreePop();
-        }
+//        if (TreeNode("SettingsIniData", "Settings unpacked data (.ini): %d bytes", g.SettingsIniData.size()))
+//        {
+//            InputTextMultiline("##Ini", (char*)(void*)g.SettingsIniData.c_str(), g.SettingsIniData.Buf.Size, ImVec2(-FLT_MIN, GetTextLineHeight() * 20), ImGuiInputTextFlags_ReadOnly);
+//            TreePop();
+//        }
         TreePop();
     }
 

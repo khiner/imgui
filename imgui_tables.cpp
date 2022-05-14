@@ -3787,43 +3787,43 @@ static void TableSettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler*, 
 
 static void TableSettingsHandler_WriteAll(ImGuiContext* ctx, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
 {
-    ImGuiContext& g = *ctx;
-    for (ImGuiTableSettings* settings = g.SettingsTables.begin(); settings != NULL; settings = g.SettingsTables.next_chunk(settings))
-    {
-        if (settings->ID == 0) // Skip ditched settings
-            continue;
+    // ImGuiContext& g = *ctx;
+    // for (ImGuiTableSettings* settings = g.SettingsTables.begin(); settings != NULL; settings = g.SettingsTables.next_chunk(settings))
+    // {
+    //     if (settings->ID == 0) // Skip ditched settings
+    //         continue;
 
-        // TableSaveSettings() may clear some of those flags when we establish that the data can be stripped
-        // (e.g. Order was unchanged)
-        const bool save_size    = (settings->SaveFlags & ImGuiTableFlags_Resizable) != 0;
-        const bool save_visible = (settings->SaveFlags & ImGuiTableFlags_Hideable) != 0;
-        const bool save_order   = (settings->SaveFlags & ImGuiTableFlags_Reorderable) != 0;
-        const bool save_sort    = (settings->SaveFlags & ImGuiTableFlags_Sortable) != 0;
-        if (!save_size && !save_visible && !save_order && !save_sort)
-            continue;
+    //     // TableSaveSettings() may clear some of those flags when we establish that the data can be stripped
+    //     // (e.g. Order was unchanged)
+    //     const bool save_size    = (settings->SaveFlags & ImGuiTableFlags_Resizable) != 0;
+    //     const bool save_visible = (settings->SaveFlags & ImGuiTableFlags_Hideable) != 0;
+    //     const bool save_order   = (settings->SaveFlags & ImGuiTableFlags_Reorderable) != 0;
+    //     const bool save_sort    = (settings->SaveFlags & ImGuiTableFlags_Sortable) != 0;
+    //     if (!save_size && !save_visible && !save_order && !save_sort)
+    //         continue;
 
-        buf->reserve(buf->size() + 30 + settings->ColumnsCount * 50); // ballpark reserve
-        buf->appendf("[%s][0x%08X,%d]\n", handler->TypeName, settings->ID, settings->ColumnsCount);
-        if (settings->RefScale != 0.0f)
-            buf->appendf("RefScale=%g\n", settings->RefScale);
-        ImGuiTableColumnSettings* column = settings->GetColumnSettings();
-        for (int column_n = 0; column_n < settings->ColumnsCount; column_n++, column++)
-        {
-            // "Column 0  UserID=0x42AD2D21 Width=100 Visible=1 Order=0 Sort=0v"
-            bool save_column = column->UserID != 0 || save_size || save_visible || save_order || (save_sort && column->SortOrder != -1);
-            if (!save_column)
-                continue;
-            buf->appendf("Column %-2d", column_n);
-            if (column->UserID != 0)                    { buf->appendf(" UserID=%08X", column->UserID); }
-            if (save_size && column->IsStretch)         { buf->appendf(" Weight=%.4f", column->WidthOrWeight); }
-            if (save_size && !column->IsStretch)        { buf->appendf(" Width=%d", (int)column->WidthOrWeight); }
-            if (save_visible)                           { buf->appendf(" Visible=%d", column->IsEnabled); }
-            if (save_order)                             { buf->appendf(" Order=%d", column->DisplayOrder); }
-            if (save_sort && column->SortOrder != -1)   { buf->appendf(" Sort=%d%c", column->SortOrder, (column->SortDirection == ImGuiSortDirection_Ascending) ? 'v' : '^'); }
-            buf->append("\n");
-        }
-        buf->append("\n");
-    }
+    //     buf->reserve(buf->size() + 30 + settings->ColumnsCount * 50); // ballpark reserve
+    //     buf->appendf("[%s][0x%08X,%d]\n", handler->TypeName, settings->ID, settings->ColumnsCount);
+    //     if (settings->RefScale != 0.0f)
+    //         buf->appendf("RefScale=%g\n", settings->RefScale);
+    //     ImGuiTableColumnSettings* column = settings->GetColumnSettings();
+    //     for (int column_n = 0; column_n < settings->ColumnsCount; column_n++, column++)
+    //     {
+    //         // "Column 0  UserID=0x42AD2D21 Width=100 Visible=1 Order=0 Sort=0v"
+    //         bool save_column = column->UserID != 0 || save_size || save_visible || save_order || (save_sort && column->SortOrder != -1);
+    //         if (!save_column)
+    //             continue;
+    //         buf->appendf("Column %-2d", column_n);
+    //         if (column->UserID != 0)                    { buf->appendf(" UserID=%08X", column->UserID); }
+    //         if (save_size && column->IsStretch)         { buf->appendf(" Weight=%.4f", column->WidthOrWeight); }
+    //         if (save_size && !column->IsStretch)        { buf->appendf(" Width=%d", (int)column->WidthOrWeight); }
+    //         if (save_visible)                           { buf->appendf(" Visible=%d", column->IsEnabled); }
+    //         if (save_order)                             { buf->appendf(" Order=%d", column->DisplayOrder); }
+    //         if (save_sort && column->SortOrder != -1)   { buf->appendf(" Sort=%d%c", column->SortOrder, (column->SortDirection == ImGuiSortDirection_Ascending) ? 'v' : '^'); }
+    //         buf->append("\n");
+    //     }
+    //     buf->append("\n");
+    // }
 }
 
 void ImGui::TableSettingsAddSettingsHandler()

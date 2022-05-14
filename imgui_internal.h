@@ -2525,6 +2525,7 @@ struct ImGuiContext
     // Settings
     bool                    SettingsLoaded;
     float                   SettingsDirtyTimer;                 // Save .ini Settings to memory when time reaches zero
+    // TODO FlowGrid: Delete this var & usages (and maybe rename/refactor `WriteAllFn` to indicate it's only populating in-memory structures?)
     ImGuiTextBuffer         SettingsIniData;                    // In memory .ini settings
     ImVector<ImGuiSettingsHandler>      SettingsHandlers;       // List of .ini settings handlers
     ImChunkStream<ImGuiWindowSettings>  SettingsWindows;        // ImGuiWindow .ini settings entries
