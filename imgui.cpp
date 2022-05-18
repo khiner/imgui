@@ -16652,8 +16652,6 @@ namespace ImGui
     static void             DockSettingsRenameNodeReferences(ImGuiID old_node_id, ImGuiID new_node_id);
     static void             DockSettingsRemoveNodeReferences(ImGuiID* node_ids, int node_ids_count);
     static ImGuiDockNodeSettings*   DockSettingsFindNodeSettings(ImGuiContext* ctx, ImGuiID node_id);
-    static void             DockSettingsHandler_ClearAll(ImGuiContext*, ImGuiSettingsHandler*);
-    static void             DockSettingsHandler_ApplyAll(ImGuiContext*, ImGuiSettingsHandler*);
     static void*            DockSettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*, const char* name);
     static void             DockSettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler*, void* entry, const char* line);
     static void             DockSettingsHandler_WriteAll(ImGuiContext* imgui_ctx, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf);
@@ -20250,7 +20248,7 @@ static ImGuiDockNodeSettings* ImGui::DockSettingsFindNodeSettings(ImGuiContext* 
 }
 
 // Clear settings data
-static void ImGui::DockSettingsHandler_ClearAll(ImGuiContext* ctx, ImGuiSettingsHandler*)
+void ImGui::DockSettingsHandler_ClearAll(ImGuiContext* ctx, ImGuiSettingsHandler*)
 {
     ImGuiDockContext* dc = &ctx->DockContext;
     dc->NodesSettings.clear();
@@ -20258,7 +20256,7 @@ static void ImGui::DockSettingsHandler_ClearAll(ImGuiContext* ctx, ImGuiSettings
 }
 
 // Recreate nodes based on settings data
-static void ImGui::DockSettingsHandler_ApplyAll(ImGuiContext* ctx, ImGuiSettingsHandler*)
+void ImGui::DockSettingsHandler_ApplyAll(ImGuiContext* ctx, ImGuiSettingsHandler*)
 {
     // Prune settings at boot time only
     ImGuiDockContext* dc = &ctx->DockContext;

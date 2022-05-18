@@ -3522,6 +3522,8 @@ namespace ImGui
     IMGUI_API void          DockBuilderCopyWindowSettings(const char* src_name, const char* dst_name);
     IMGUI_API void          DockBuilderFinish(ImGuiID node_id);
 
+    IMGUI_API void          DockSettingsHandler_ClearAll(ImGuiContext*, ImGuiSettingsHandler*);
+    IMGUI_API void          DockSettingsHandler_ApplyAll(ImGuiContext*, ImGuiSettingsHandler*);
     // [EXPERIMENTAL] Focus Scope
     // This is generally used to identify a unique input location (for e.g. a selection set)
     // There is one per window (automatically set in Begin), but:
