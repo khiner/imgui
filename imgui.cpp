@@ -1325,7 +1325,6 @@ ImGuiIO::ImGuiIO()
     BackendFlags = ImGuiBackendFlags_None;
     DisplaySize = ImVec2(-1.0f, -1.0f);
     DeltaTime = 1.0f / 60.0f;
-    IniSavingRate = 5.0f;
     IniFilename = "imgui.ini"; // Important: "imgui.ini" is relative to current working dir, most apps will want to lock this to an absolute path (e.g. same path as executables).
     LogFilename = "imgui_log.txt";
 #ifndef IMGUI_DISABLE_OBSOLETE_KEYIO
@@ -14332,34 +14331,28 @@ void ImGui::UpdateSettings()
         g.SettingsLoaded = true;
     }
 
-    // Save settings (with a delay after the last modification, so we don't spam disk too much)
-    if (g.SettingsDirtyTimer > 0.0f)
+    // Save settings
+    if (g.SettingsDirty)
     {
-        g.SettingsDirtyTimer -= g.IO.DeltaTime;
-        if (g.SettingsDirtyTimer <= 0.0f)
-        {
-            if (g.IO.IniFilename != NULL)
-                SaveIniSettingsToDisk(g.IO.IniFilename);
-            else
-                g.IO.WantSaveIniSettings = true;  // Let user know they can call SaveIniSettingsToMemory(). user will need to clear io.WantSaveIniSettings themselves.
-            g.SettingsDirtyTimer = 0.0f;
-        }
+        if (g.IO.IniFilename != NULL)
+            SaveIniSettingsToDisk(g.IO.IniFilename);
+        else
+            g.IO.WantSaveIniSettings = true;  // Let user know they can call SaveIniSettingsToMemory(). user will need to clear io.WantSaveIniSettings themselves.
+        g.SettingsDirty = false;
     }
 }
 
 void ImGui::MarkIniSettingsDirty()
 {
     ImGuiContext& g = *GImGui;
-    if (g.SettingsDirtyTimer <= 0.0f)
-        g.SettingsDirtyTimer = g.IO.IniSavingRate;
+    g.SettingsDirty = true;
 }
 
 void ImGui::MarkIniSettingsDirty(ImGuiWindow* window)
 {
     ImGuiContext& g = *GImGui;
     if (!(window->Flags & ImGuiWindowFlags_NoSavedSettings))
-        if (g.SettingsDirtyTimer <= 0.0f)
-            g.SettingsDirtyTimer = g.IO.IniSavingRate;
+        g.SettingsDirty = true;
 }
 
 void ImGui::AddSettingsHandler(const ImGuiSettingsHandler* handler)
@@ -14484,7 +14477,7 @@ void ImGui::ClearIniSettings()
 void ImGui::SaveIniSettingsToDisk(const char* ini_filename)
 {
     ImGuiContext& g = *GImGui;
-    g.SettingsDirtyTimer = 0.0f;
+    g.SettingsDirty = false;
     if (!ini_filename)
         return;
 
@@ -14501,7 +14494,7 @@ void ImGui::SaveIniSettingsToDisk(const char* ini_filename)
 const char* ImGui::SaveIniSettingsToMemory(size_t* out_size)
 {
     ImGuiContext& g = *GImGui;
-    g.SettingsDirtyTimer = 0.0f;
+    g.SettingsDirty = false;
     g.SettingsIniData.Buf.resize(0);
     g.SettingsIniData.Buf.push_back(0);
     for (ImGuiSettingsHandler& handler : g.SettingsHandlers)
@@ -20427,7 +20420,7 @@ void ImGui::ShowMetricsWindow()
         else
             TextUnformatted("<NULL>");
         Checkbox("io.ConfigDebugIniSettings", &io.ConfigDebugIniSettings);
-        Text("SettingsDirtyTimer %.2f", g.SettingsDirtyTimer);
+        Text("SettingsDirty %d", g.SettingsDirty);
         if (TreeNode("SettingsHandlers", "Settings handlers: (%d)", g.SettingsHandlers.Size))
         {
             for (ImGuiSettingsHandler& handler : g.SettingsHandlers)
