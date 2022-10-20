@@ -21196,13 +21196,13 @@ void ImGui::ShowMetricsWindow()
         TreePop();
     }
 
-    // Details for Fonts
-    ImFontAtlas* atlas = g.IO.Fonts;
-    if (TreeNode("Fonts", "Fonts (%d)", atlas->Fonts.Size))
-    {
-        ShowFontAtlas(atlas);
-        TreePop();
-    }
+    // Details for Fonts (FlowGrid: Disabling this redundant font info section to isolate font editing to style editor, where changes are undoable)
+//    ImFontAtlas* atlas = g.IO.Fonts;
+//    if (TreeNode("Fonts", "Fonts (%d)", atlas->Fonts.Size))
+//    {
+//        ShowFontAtlas(atlas);
+//        TreePop();
+//    }
 
     // Details for InputText
     if (TreeNode("InputText"))
@@ -21848,13 +21848,14 @@ void ImGui::DebugNodeDrawCmdShowMeshAndBoundingBox(ImDrawList* out_draw_list, co
 }
 
 // [DEBUG] Display details for a single font, called by ShowStyleEditor().
+// FlowGrid: Disabling default font selection and individual font scaling in favor of the style editor font selector & global font scaling
 void ImGui::DebugNodeFont(ImFont* font)
 {
     bool opened = TreeNode(font, "Font: \"%s\"\n%.2f px, %d glyphs, %d file(s)",
         font->ConfigData ? font->ConfigData[0].Name : "", font->FontSize, font->Glyphs.Size, font->ConfigDataCount);
-    SameLine();
-    if (SmallButton("Set as default"))
-        GetIO().FontDefault = font;
+//    SameLine();
+//    if (SmallButton("Set as default"))
+//        GetIO().FontDefault = font;
     if (!opened)
         return;
 
@@ -21864,14 +21865,14 @@ void ImGui::DebugNodeFont(ImFont* font)
     PopFont();
 
     // Display details
-    SetNextItemWidth(GetFontSize() * 8);
-    DragFloat("Font scale", &font->Scale, 0.005f, 0.3f, 2.0f, "%.1f");
-    SameLine(); MetricsHelpMarker(
-        "Note that the default embedded font is NOT meant to be scaled.\n\n"
-        "Font are currently rendered into bitmaps at a given size at the time of building the atlas. "
-        "You may oversample them to get some flexibility with scaling. "
-        "You can also render at multiple sizes and select which one to use at runtime.\n\n"
-        "(Glimmer of hope: the atlas system will be rewritten in the future to make scaling more flexible.)");
+    // SetNextItemWidth(GetFontSize() * 8);
+    // DragFloat("Font scale", &font->Scale, 0.005f, 0.3f, 2.0f, "%.1f");
+    // SameLine(); MetricsHelpMarker(
+    //     "Note that the default embedded font is NOT meant to be scaled.\n\n"
+    //     "Font are currently rendered into bitmaps at a given size at the time of building the atlas. "
+    //     "You may oversample them to get some flexibility with scaling. "
+    //     "You can also render at multiple sizes and select which one to use at runtime.\n\n"
+    //     "(Glimmer of hope: the atlas system will be rewritten in the future to make scaling more flexible.)");
     Text("Ascent: %f, Descent: %f, Height: %f", font->Ascent, font->Descent, font->Ascent - font->Descent);
     char c_str[5];
     Text("Fallback character: '%s' (U+%04X)", ImTextCharToUtf8(c_str, font->FallbackChar), font->FallbackChar);
