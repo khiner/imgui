@@ -561,14 +561,14 @@ void ImGui::ShowDemoWindow()
             ImGui::Spacing();
         }
 
-        IMGUI_DEMO_MARKER("Configuration/Style");
-        if (ImGui::TreeNode("Style"))
-        {
-            HelpMarker("The same contents can be accessed in 'Tools->Style Editor' or by calling the ShowStyleEditor() function.");
-            ImGui::ShowStyleEditor();
-            ImGui::TreePop();
-            ImGui::Spacing();
-        }
+        // IMGUI_DEMO_MARKER("Configuration/Style");
+        // if (ImGui::TreeNode("Style"))
+        // {
+        //     HelpMarker("The same contents can be accessed in 'Tools->Style Editor' or by calling the ShowStyleEditor() function.");
+        //     ImGui::ShowStyleEditor();
+        //     ImGui::TreePop();
+        //     ImGui::Spacing();
+        // }
 
         IMGUI_DEMO_MARKER("Configuration/Capture, Logging");
         if (ImGui::TreeNode("Capture/Logging"))
