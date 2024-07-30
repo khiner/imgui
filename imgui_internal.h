@@ -2118,8 +2118,8 @@ struct ImGuiDebugAllocInfo
 
 struct ImGuiMetricsConfig
 {
-    bool        ShowDebugLog = false;
-    bool        ShowIDStackTool = false;
+    // bool        ShowDebugLog = false;
+    // bool        ShowIDStackTool = false;
     bool        ShowWindowsRects = false;
     bool        ShowWindowsBeginOrder = false;
     bool        ShowTablesRects = false;
